@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="./2.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="./2.png" sizes="16x16">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <title>Claim STKN</title>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+    </style>
+
+</head>
+
+<body
+    style="background: #2b5876; background: -webkit-linear-gradient(to right, #2b5876, #4e4376); background: linear-gradient(to right, #2b5876, #4e4376);">
+    <div
+        class="max-w-full lg:w-1/3 lg:mx-auto xl:w-1/3 lx:mx-auto md:w-1/2 md:mx-auto sm:w-[60%] sm:mx-auto h-auto py-4 px-4 mx-4 mt-4 mb-4 lg:mt-6 lg:mb-0 backdrop-blur-lg bg-white/5 font-poppins rounded-lg shadow-md lg:shadow-lg xl:rounded-lg xl:shadow-lg">
+        <div class="flex justify-between">
+            <div id="connectButtonContainer">
+                <button id="connectButton" class="px-3 py-1 bg-slate-700 text-white rounded-lg">Connect to
+                    MetaMask</button>
+            </div>
+            <div class="flex items-center">
+                <div class="w-7 h-7 border border-sky-400 rounded-full mr-1"><img src="./1.png" alt=""></div>
+                <h2 class="font-semibold text-slate-300">TESTNET</h2>
+            </div>
+        </div>
+
+        <div class="mt-3 mb-5">
+            <h2 class="text-white">$STKN to Claim : <span id="plsConnect">Connect to Metamask</span><span
+                    id="totalTokenValue"></span></h2>
+            <p class="text-white">contract : <a href="https://saturn-explorer.swanchain.io/token/0x389A30076E27aa98c968B78D4FD3c6d6b3cdf20A" target="_blank" class="text-sky-600 underline">explorer.swanchain.io</a></p>
+        </div>
+        <input id="inputValue" type="text" value="0.0001" style="display: none;">
+        <div class="flex items-center justify-between">
+            <button id="airdropButton" class="mr-4 px-3 py-1 bg-slate-700 text-white rounded-lg">10.000 STKN</button>
+            <a href="#" class="text-sky-600 underline">Staking STKN</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+
+        const contractClaimToken = '0x6BC4610f3A036eDda99178f32190c85070765ad8';
+        const claimTokenABI = [
+            {
+                "inputs": [],
+                "name": "claimTokens",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "buyer",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "TokensPurchased",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "newTotalToken",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "TotalTokenUpdated",
+                "type": "event"
+            },
+            {
+                "inputs": [],
+                "name": "withdrawETH",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "withdrawTokens",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "stateMutability": "payable",
+                "type": "receive"
+            },
+            {
+                "inputs": [],
+                "name": "getTokenBalance",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "owner",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "rate",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "tokenAddress",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "totalToken",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        let web3;
+        let contract;
+
+        async function init() {
+            if (typeof window.ethereum !== 'undefined') {
+                web3 = new Web3(window.ethereum);
+                try {
+                    await window.ethereum.enable();
+                    const accounts = await web3.eth.getAccounts();
+                    const account = accounts[0];
+
+                    if (account) {
+                        const shortAddress = account.substring(0, 6) + "..." + account.substring(account.length - 6);
+                        console.log('Connected to MetaMask. Account:', shortAddress);
+
+                        document.getElementById('connectButton').textContent = `${shortAddress}`;
+
+                        contract = new web3.eth.Contract(claimTokenABI, contractClaimToken);
+
+                        document.getElementById('plsConnect').style.display = "none";
+
+                        await updateTotalToken();
+                    } else {
+                        console.error('No account found');
+                    }
+
+                } catch (error) {
+                    console.error('Error connecting to MetaMask:', error);
+                }
+            } else {
+                console.log('MetaMask not detected.');
+                document.getElementById('message').innerHTML = 'Please install MetaMask to use this DApp.';
+            }
+        }
+        async function updateTotalToken() {
+            try {
+                const totalTokenElement = document.getElementById('totalTokenValue');
+                const result = await contract.methods.totalToken().call();
+
+                const formattedResult = (result / 10 ** 18).toFixed(0);
+
+                totalTokenElement.innerHTML = formattedResult;
+            } catch (error) {
+                console.error('Error updating total token:', error);
+            }
+        }
+
+        async function claimTokens() {
+            if (!web3 || !contract) {
+                Swal.fire({
+                    position: "top-center",
+                    icon: "error",
+                    title: "Please connect to Metamask",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                return;
+            }
+
+            const inputValue = document.getElementById('inputValue').value;
+            const weiValue = web3.utils.toWei(inputValue, 'ether');
+
+            try {
+                const accounts = await web3.eth.getAccounts();
+                const account = accounts[0];
+
+                if (!account) {
+                    Swal.fire({
+                        position: "top-center",
+                        icon: "error",
+                        title: "Please connect to Metamask",
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    return;
+                }
+
+                const gasPrice = await web3.eth.getGasPrice();
+                const gasEstimate = await contract.methods.claimTokens().estimateGas({ from: account, value: weiValue });
+
+                const result = await contract.methods.claimTokens().send({ from: account, value: weiValue, gas: gasEstimate, gasPrice: gasPrice });
+
+                console.log('Transaction result:', result);
+
+                Swal.fire({
+                    position: "top-center",
+                    icon: "success",
+                    title: "Claim successful",
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+            } catch (error) {
+                console.error('Error claiming tokens:', error);
+                Swal.fire({
+                    position: "top-center",
+                    icon: "error",
+                    title: "Failed to claim",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+        }
+
+        document.getElementById('connectButton').addEventListener('click', init);
+        document.getElementById('airdropButton').addEventListener('click', claimTokens);
+
+        window.addEventListener('load', async () => {
+            if (window.ethereum) {
+                init();
+            }
+        });
+    </script>
+</body>
+
+</html>
